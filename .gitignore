@@ -17,3 +17,4 @@ wheels/
 .python-version
 *.sqlite3
 db.sqlite3
+.gitignore
