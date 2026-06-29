@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: nomba-checkout-backend
+    env: python
+    buildCommand: bash build.sh
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --worker-class gthread --workers 2 --threads 4 --timeout 60
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "nomba-checkout-backend.onrender.com,*"
+      - key: DATABASE_URL
+        sync: false
+      - key: NOMBA_CLIENT_ID
+        sync: false
+      - key: NOMBA_CLIENT_SECRET
+        sync: false
+      - key: NOMBA_ACCOUNT_ID
+        sync: false
+      - key: NOMBA_SANDBOX
+        value: "True"
+      - key: NOMBA_WEBHOOK_KEY
+        sync: false
+      - key: PLUGIN_API_SECRET
+        sync: false

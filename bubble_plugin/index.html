@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Nomba Checkout — Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #F3F4F6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    gap: 16px;
+  }
+
+  /* ── preview toolbar ── */
+  .toolbar {
+    width: 100%;
+    max-width: 420px;
+    background: #1A1A2E;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .toolbar-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .toolbar-screens {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .toolbar-screens button {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: transparent;
+    color: rgba(255,255,255,.7);
+    cursor: pointer;
+  }
+  .toolbar-screens button:hover,
+  .toolbar-screens button.active {
+    background: #0EA371;
+    border-color: #0EA371;
+    color: #fff;
+  }
+
+  /* ── phone frame ── */
+  .phone-frame {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    overflow: hidden;
+  }
+  .phone-notch {
+    background: #fff;
+    padding: 12px 20px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #1A1A2E;
+    font-weight: 600;
+    border-bottom: 1px solid #F3F4F6;
+  }
+  .phone-notch .status-icons { display: flex; gap: 5px; align-items: center; }
+  .phone-notch .status-icons span { font-size: 14px; }
+
+  /* ── checkout wrap ── */
+  .nc-wrap { width: 100%; background: #fff; }
+  .nc-screen { display: none; padding: 24px; }
+  .nc-screen.active { display: block; }
+
+  .nc-header { text-align: center; margin-bottom: 24px; }
+  .nc-header .nc-amount {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.5px;
+  }
+  .nc-header .nc-label { font-size: 13px; color: #6B7280; margin-top: 4px; }
+
+  .nc-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .nc-tab {
+    padding: 14px 8px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6B7280;
+    background: #fff;
+    transition: all .15s;
+  }
+  .nc-tab:hover  { border-color: #0EA371; color: #0EA371; }
+  .nc-tab.active { border-color: #0EA371; background: #F0FDF8; color: #0EA371; }
+  .nc-tab .nc-tab-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+
+  .nc-field  { margin-bottom: 16px; }
+  .nc-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .nc-field input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #1A1A2E;
+    background: #FAFAFA;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .nc-field input:focus { border-color: #0EA371; background: #fff; }
+  .nc-field input::placeholder { color: #9CA3AF; }
+  .nc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .nc-card-row { position: relative; }
+  .nc-card-brand {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    color: #6B7280;
+    background: #F3F4F6;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+
+  .nc-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 20px;
+  }
+  .nc-check input[type=checkbox] { width: 18px; height: 18px; accent-color: #0EA371; flex-shrink: 0; }
+
+  .nc-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #0EA371;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .nc-btn:hover { background: #0B8A5E; }
+  .nc-btn.nc-btn-ghost {
+    background: transparent;
+    color: #6B7280;
+    border: 1.5px solid #E5E7EB;
+    margin-top: 10px;
+  }
+  .nc-btn.nc-btn-ghost:hover { border-color: #0EA371; color: #0EA371; background: transparent; }
+
+  .nc-saved-card {
+    border: 1.5px solid #0EA371;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: #F0FDF8;
+  }
+  .nc-sc-top { display: flex; align-items: center; gap: 12px; }
+  .nc-sc-icon { font-size: 30px; }
+  .nc-sc-name { font-size: 14px; font-weight: 700; color: #1A1A2E; }
+  .nc-sc-num  { font-size: 13px; color: #6B7280; margin-top: 2px; }
+
+  .nc-otp-wrap { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; }
+  .nc-otp-inp {
+    width: 48px;
+    height: 56px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    color: #1A1A2E;
+    background: #FAFAFA;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .nc-otp-inp:focus { border-color: #0EA371; background: #fff; }
+  .nc-otp-inp.filled { border-color: #0EA371; background: #F0FDF8; }
+
+  .nc-va-box {
+    background: #F0FDF8;
+    border: 1.5px solid #0EA371;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .nc-va-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid #D1FAE5;
+  }
+  .nc-va-row:last-child { border-bottom: none; }
+  .nc-va-k { font-size: 12px; color: #6B7280; font-weight: 500; }
+  .nc-va-v { font-size: 15px; font-weight: 700; color: #1A1A2E; }
+  .nc-copy {
+    font-size: 12px;
+    color: #0EA371;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 8px;
+    border: 1px solid #0EA371;
+    border-radius: 4px;
+  }
+
+  .nc-va-note { font-size: 13px; color: #6B7280; text-align: center; margin-bottom: 16px; line-height: 1.5; }
+
+  .nc-poll-bar { height: 4px; background: #E5E7EB; border-radius: 2px; overflow: hidden; margin-bottom: 20px; }
+  .nc-poll-fill {
+    height: 100%;
+    background: #0EA371;
+    border-radius: 2px;
+    animation: nc-poll 1.8s ease-in-out infinite;
+  }
+  @keyframes nc-poll { 0%{width:0%} 50%{width:80%} 100%{width:0%} }
+
+  .nc-status-wrap { text-align: center; padding: 36px 24px; }
+  .nc-status-icon { font-size: 64px; margin-bottom: 16px; }
+  .nc-status-title { font-size: 22px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+  .nc-status-sub { font-size: 14px; color: #6B7280; line-height: 1.6; max-width: 260px; margin: 0 auto 28px; }
+
+  .nc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #F0FDF8;
+    border: 1px solid #D1FAE5;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #0EA371;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .nc-powered {
+    text-align: center;
+    font-size: 11px;
+    color: #9CA3AF;
+    padding: 14px 0 6px;
+  }
+  .nc-powered span { color: #0EA371; font-weight: 600; }
+
+  .nc-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: #9CA3AF;
+    font-size: 12px;
+  }
+  .nc-divider::before, .nc-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #E5E7EB;
+  }
+</style>
+</head>
+<body>
+
+<!-- toolbar -->
+<div class="toolbar">
+  <span class="toolbar-title">📱 Checkout Preview</span>
+  <div class="toolbar-screens">
+    <button onclick="show('nc-method')" class="active" id="btn-method">Method</button>
+    <button onclick="show('nc-savedcard')" id="btn-savedcard">Saved Card</button>
+    <button onclick="show('nc-cardform')" id="btn-cardform">Card Form</button>
+    <button onclick="show('nc-otp')" id="btn-otp">OTP</button>
+    <button onclick="show('nc-transfer')" id="btn-transfer">Transfer</button>
+    <button onclick="show('nc-success')" id="btn-success">Success</button>
+    <button onclick="show('nc-failed')" id="btn-failed">Failed</button>
+  </div>
+</div>
+
+<!-- phone frame -->
+<div class="phone-frame">
+  <!-- status bar -->
+  <div class="phone-notch">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>●●●</span><span>WiFi</span><span>🔋</span>
+    </div>
+  </div>
+
+  <div class="nc-wrap">
+
+    <!-- ── METHOD SELECT ── -->
+    <div class="nc-screen active" id="nc-method">
+      <div class="nc-header">
+        <div class="nc-amount">₦25,000.00</div>
+        <div class="nc-label">How would you like to pay?</div>
+      </div>
+      <div class="nc-tabs">
+        <div class="nc-tab" onclick="selectMethod('card')" id="tab-card">
+          <span class="nc-tab-icon">💳</span>
+          Card
+        </div>
+        <div class="nc-tab" onclick="selectMethod('transfer')" id="tab-transfer">
+          <span class="nc-tab-icon">🏦</span>
+          Transfer
+        </div>
+      </div>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+    <!-- ── SAVED CARD ── -->
+    <div class="nc-screen" id="nc-savedcard">
+      <div class="nc-header">
+        <div class="nc-amount">₦25,000.00</div>
+        <div class="nc-label">Complete your payment</div>
+      </div>
+      <div class="nc-saved-card">
+        <div class="nc-sc-top">
+          <div class="nc-sc-icon">💳</div>
+          <div>
+            <div class="nc-sc-name">Mastercard</div>
+            <div class="nc-sc-num">•••• •••• •••• 4567</div>
+          </div>
+        </div>
+      </div>
+      <button class="nc-btn" onclick="show('nc-success')">Pay ₦25,000.00</button>
+      <div class="nc-divider">or</div>
+      <button class="nc-btn nc-btn-ghost" onclick="show('nc-cardform')">Use a different card</button>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+    <!-- ── CARD FORM ── -->
+    <div class="nc-screen" id="nc-cardform">
+      <div class="nc-header">
+        <div class="nc-amount">₦25,000.00</div>
+        <div class="nc-label">Enter your card details</div>
+      </div>
+      <div class="nc-field nc-card-row">
+        <label>Card Number</label>
+        <input id="cardnum" inputmode="numeric" maxlength="19"
+               placeholder="0000 0000 0000 0000" oninput="fmtCard(this)">
+        <span class="nc-card-brand" id="brand"></span>
+      </div>
+      <div class="nc-field">
+        <label>Cardholder Name</label>
+        <input placeholder="Name on card" autocomplete="cc-name">
+      </div>
+      <div class="nc-row">
+        <div class="nc-field">
+          <label>Expiry</label>
+          <input inputmode="numeric" maxlength="5" placeholder="MM/YY"
+                 oninput="fmtExpiry(this)">
+        </div>
+        <div class="nc-field">
+          <label>CVV</label>
+          <input inputmode="numeric" maxlength="4" placeholder="•••" type="password">
+        </div>
+      </div>
+      <label class="nc-check">
+        <input type="checkbox">
+        Save card for faster checkout next time
+      </label>
+      <button class="nc-btn" onclick="show('nc-otp')">Pay ₦25,000.00</button>
+      <button class="nc-btn nc-btn-ghost" onclick="show('nc-method')">← Back</button>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+    <!-- ── OTP ── -->
+    <div class="nc-screen" id="nc-otp">
+      <div class="nc-header">
+        <div class="nc-amount">₦25,000.00</div>
+        <div class="nc-label">Enter the OTP sent to your phone</div>
+      </div>
+      <div class="nc-otp-wrap" id="otp-boxes"></div>
+      <button class="nc-btn" onclick="show('nc-success')">Verify Payment</button>
+      <button class="nc-btn nc-btn-ghost" onclick="alert('OTP resent!')">Resend OTP</button>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+    <!-- ── TRANSFER ── -->
+    <div class="nc-screen" id="nc-transfer">
+      <div class="nc-header">
+        <div class="nc-amount">₦25,000.00</div>
+        <div class="nc-label">Transfer the exact amount to</div>
+      </div>
+      <div class="nc-va-box">
+        <div class="nc-va-row">
+          <span class="nc-va-k">Bank</span>
+          <span class="nc-va-v">Guaranty Trust Bank</span>
+        </div>
+        <div class="nc-va-row">
+          <span class="nc-va-k">Account Number</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="nc-va-v">0123456789</span>
+            <span class="nc-copy" onclick="copyText('0123456789', this)">Copy</span>
+          </span>
+        </div>
+        <div class="nc-va-row">
+          <span class="nc-va-k">Account Name</span>
+          <span class="nc-va-v">Nomba Checkout</span>
+        </div>
+        <div class="nc-va-row">
+          <span class="nc-va-k">Amount</span>
+          <span class="nc-va-v" style="color:#0EA371">₦25,000.00</span>
+        </div>
+      </div>
+      <p class="nc-va-note">
+        ⚠️ Transfer the <strong>exact amount</strong>.<br>
+        Do not close this screen — we'll confirm automatically.
+      </p>
+      <div class="nc-poll-bar"><div class="nc-poll-fill"></div></div>
+      <button class="nc-btn nc-btn-ghost" onclick="show('nc-method')">← Change payment method</button>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+    <!-- ── SUCCESS ── -->
+    <div class="nc-screen" id="nc-success">
+      <div class="nc-status-wrap">
+        <div class="nc-badge">✓ Verified by Nomba</div>
+        <div class="nc-status-icon">🎉</div>
+        <div class="nc-status-title">Payment Successful</div>
+        <div class="nc-status-sub">
+          Your payment of <strong>₦25,000.00</strong> has been confirmed.
+          Thank you!
+        </div>
+      </div>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+    <!-- ── FAILED ── -->
+    <div class="nc-screen" id="nc-failed">
+      <div class="nc-status-wrap">
+        <div class="nc-status-icon">😕</div>
+        <div class="nc-status-title">Payment Failed</div>
+        <div class="nc-status-sub">
+          We couldn't complete your payment. Please check your card details and try again.
+        </div>
+      </div>
+      <button class="nc-btn" onclick="show('nc-method')"
+              style="margin:0 24px 24px;width:calc(100% - 48px)">
+        Try Again
+      </button>
+      <div class="nc-powered">Secured by <span>Nomba</span></div>
+    </div>
+
+  </div><!-- nc-wrap -->
+</div><!-- phone-frame -->
+
+<script>
+  // ── screen switcher ───────────────────────────────────────────────────────
+  function show(id) {
+    document.querySelectorAll(".nc-screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    document.querySelectorAll(".toolbar-screens button").forEach(b => b.classList.remove("active"));
+    const btn = document.getElementById("btn-" + id.replace("nc-", ""));
+    if (btn) btn.classList.add("active");
+  }
+
+  function selectMethod(method) {
+    document.getElementById("tab-card").classList.toggle("active", method === "card");
+    document.getElementById("tab-transfer").classList.toggle("active", method === "transfer");
+    setTimeout(() => show(method === "card" ? "nc-savedcard" : "nc-transfer"), 150);
+  }
+
+  // ── card number formatting ────────────────────────────────────────────────
+  function fmtCard(el) {
+    let v = el.value.replace(/\D/g, "").slice(0, 16);
+    el.value = v.replace(/(.{4})/g, "$1 ").trim();
+    const b = document.getElementById("brand");
+    if (/^4/.test(v))       b.textContent = "VISA";
+    else if (/^5[1-5]/.test(v)) b.textContent = "MC";
+    else                    b.textContent = "";
+  }
+
+  function fmtExpiry(el) {
+    let v = el.value.replace(/\D/g, "").slice(0, 4);
+    if (v.length > 2) v = v.slice(0,2) + "/" + v.slice(2);
+    el.value = v;
+  }
+
+  // ── OTP boxes ─────────────────────────────────────────────────────────────
+  const wrap = document.getElementById("otp-boxes");
+  for (let i = 0; i < 6; i++) {
+    const inp = document.createElement("input");
+    inp.className = "nc-otp-inp";
+    inp.maxLength = 1;
+    inp.inputMode = "numeric";
+    inp.addEventListener("input", e => {
+      if (e.target.value) {
+        e.target.classList.add("filled");
+        if (i < 5) wrap.children[i + 1].focus();
+      }
+    });
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Backspace" && !e.target.value) {
+        e.target.classList.remove("filled");
+        if (i > 0) wrap.children[i - 1].focus();
+      }
+    });
+    wrap.appendChild(inp);
+  }
+
+  // ── copy helper ───────────────────────────────────────────────────────────
+  function copyText(text, el) {
+    navigator.clipboard?.writeText(text).then(() => {
+      const orig = el.textContent;
+      el.textContent = "Copied!";
+      setTimeout(() => el.textContent = orig, 1500);
+    });
+  }
+</script>
+
+</body>
+</html>
