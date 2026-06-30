@@ -468,7 +468,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = "==4.4.0" },
     { name = "djangorestframework", specifier = "==3.15.2" },
     { name = "gunicorn", specifier = "==22.0.0" },
-    { name = "nomba-python", specifier = "==0.1.1" },
+    { name = "nomba-python", specifier = "==0.2.1" },
     { name = "psycopg2-binary", specifier = "==2.9.9" },
     { name = "python-decouple", specifier = "==3.8" },
     { name = "whitenoise", specifier = "==6.7.0" },
@@ -476,7 +476,7 @@ requires-dist = [
 
 [[package]]
 name = "nomba-python"
-version = "0.1.1"
+version = "0.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -484,7 +484,7 @@ dependencies = [
     { name = "twine" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/20/db/56712dbb94f4993a8c4777b98082fa061684aa8b0e8f4d96bd5a4ec14e4b/nomba_python-0.1.1-py3-none-any.whl", hash = "sha256:323066c499e9d2029707cc1c41975ad67388db0a737ccf6f0a752f6c5b05d095", size = 63741, upload-time = "2026-06-23T04:59:55.084Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/95/62c60d91e87d80f8f5b28a6f2e713f212d08e059a15d783ca96476c16308/nomba_python-0.2.1-py3-none-any.whl", hash = "sha256:ea8f657ce244c47492921db70d619c622009fa545e2f2acbb09ecb5e9d9058cc", size = 86771, upload-time = "2026-06-29T21:42:50.052Z" },
 ]
 
 [[package]]

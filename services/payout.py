@@ -8,7 +8,6 @@ recorded in TransferLog regardless of outcome so nothing is silently lost.
 from __future__ import annotations
 
 import logging
-import uuid
 
 from nomba import NombaAPIError
 
@@ -45,7 +44,7 @@ def payout_to_dev(payment: Payment) -> TransferLog:
     transfer_status = TransferLog.Status.FAILED
 
     try:
-        result = nomba.transfers.perform_bank_account_transfer_the_parent_account(
+        result = nomba.transfers.perform_bank_account_transfer_from_the_parent_account(
             amount=str(payment.amount),
             account_number=dev.account_number,
             account_name=dev.account_name,

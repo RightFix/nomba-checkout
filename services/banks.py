@@ -51,7 +51,7 @@ def get_banks() -> list[dict]:
     try:
         from services.nomba import get_client
         nomba = get_client()
-        result = nomba.transfers.list_banks()
+        result = nomba.transfers.fetch_bank_codes_and_names()
         banks_data = result.get("data", {})
         # Nomba returns banks nested differently; adapt as needed
         if isinstance(banks_data, list) and banks_data:

@@ -1,7 +1,7 @@
 [project]
 name = "nomba-checkout"
 version = "0.1.0"
-description = "Add your description here"
+description = "A checkout plugin for Nomba in Bubble Website using Django as the backend"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -10,7 +10,7 @@ dependencies = [
     "django-cors-headers==4.4.0",
     "djangorestframework==3.15.2",
     "gunicorn==22.0.0",
-    "nomba-python==0.1.1",
+    "nomba-python==0.2.1",
     "psycopg2-binary==2.9.9",
     "python-decouple==3.8",
     "whitenoise==6.7.0",

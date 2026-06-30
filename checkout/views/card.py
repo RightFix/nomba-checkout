@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from nomba import NombaAPIError
 from nomba.flows import CardPaymentFlow
 
-from checkout.models import Dev, Payment, SavedCard
+from checkout.models import Payment, SavedCard
 from checkout.permissions import IsPluginRequest
 from checkout.serializers import (
     SubmitCardSerializer,
@@ -207,7 +207,7 @@ class TokenizedCardPayView(APIView):
         try:
             result = nomba.checkout.charge_customer_with_tokenized_card_data(
                 order_reference=payment.payment_ref,
-                card_token=saved.card_token,
+                token_key=saved.card_token,
                 customer_email=data["customer_email"],
             )
             result_data = result.get("data", result)
