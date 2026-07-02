@@ -11,7 +11,6 @@ from rest_framework.views import APIView
 from nomba import NombaAPIError
 
 from checkout.models import Payment, VirtualAccountSession
-from checkout.permissions import IsPluginRequest
 from checkout.serializers import VirtualAccountSerializer
 from services.nomba import get_client
 
@@ -29,7 +28,6 @@ class CreateVirtualAccountView(APIView):
     Calling this twice for the same payment_ref returns the existing
     virtual account (idempotent).
     """
-    permission_classes = [IsPluginRequest]
 
     def post(self, request: Request) -> Response:
         payment_ref = request.data.get("payment_ref")
@@ -40,7 +38,7 @@ class CreateVirtualAccountView(APIView):
             )
 
         try:
-            payment = Payment.objects.select_related("dev").get(
+            payment = Payment.objects.get(
                 payment_ref=payment_ref
             )
         except Payment.DoesNotExist:

@@ -82,7 +82,6 @@ class NombaWebhookView(APIView):
                     transaction_id=txn_id,
                     status=Payment.Status.PENDING,
                 )
-                .select_related("dev")
                 .first()
             )
 
@@ -125,7 +124,6 @@ class NombaWebhookView(APIView):
                         account_number=va_number,
                         status=VirtualAccountSession.Status.PENDING,
                     )
-                    .select_related("payment__dev")
                     .first()
                 )
 

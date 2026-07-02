@@ -3,25 +3,8 @@ from __future__ import annotations
 import uuid
 from django.db import models
 
-
-class Dev(models.Model):
-    """
-    A developer who has installed the Bubble plugin and registered their
-    bank account. Money collected from their customers is forwarded here.
-    """
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    account_number = models.CharField(max_length=20, unique=True)
-    account_name = models.CharField(max_length=255)  # confirmed from Nomba lookup
-    bank_code = models.CharField(max_length=16)
-    bank_name = models.CharField(max_length=128)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self) -> str:
-        return f"{self.account_name} ({self.bank_name})"
-
+def generate_reference():
+    return f"NP-{uuid.uuid4().hex[:12].upper()}"
 
 class Payment(models.Model):
     """
@@ -41,8 +24,8 @@ class Payment(models.Model):
         TRANSFER = "transfer", "Bank Transfer"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    dev = models.ForeignKey(Dev, on_delete=models.PROTECT, related_name="payments")
-    payment_ref = models.CharField(max_length=128, unique=True)
+    dev_id = models.CharField(max_length=128, default="")
+    payment_ref = models.CharField(max_length=20,default=generate_reference, editable=False,unique=True)
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     currency = models.CharField(max_length=8, default="NGN")
     customer_email = models.EmailField()
@@ -61,7 +44,7 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"{self.payment_ref} [{self.status}] → {self.dev.account_name}"
+        return f"{self.payment_ref} [{self.status}] → {self.dev_id}"
 
 
 class SavedCard(models.Model):
@@ -72,7 +55,7 @@ class SavedCard(models.Model):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    dev = models.ForeignKey(Dev, on_delete=models.CASCADE, related_name="saved_cards")
+    dev_id = models.CharField(max_length=128,default='')
     customer_email = models.EmailField()
     card_token = models.TextField()  # opaque token from Nomba
     card_last4 = models.CharField(max_length=4, blank=True)
@@ -81,10 +64,10 @@ class SavedCard(models.Model):
 
     class Meta:
         # one saved card per customer per dev (latest wins)
-        unique_together = [("dev", "customer_email")]
+        unique_together = [("dev_id", "customer_email")]
 
     def __str__(self) -> str:
-        return f"{self.customer_email} card on {self.dev.account_name} (***{self.card_last4})"
+        return f"{self.customer_email} card on {self.dev_id} (***{self.card_last4})"
 
 
 class VirtualAccountSession(models.Model):
@@ -144,7 +127,6 @@ class TransferLog(models.Model):
     payment = models.OneToOneField(
         Payment, on_delete=models.PROTECT, related_name="transfer_log"
     )
-    dev = models.ForeignKey(Dev, on_delete=models.PROTECT, related_name="transfer_logs")
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     merchant_tx_ref = models.CharField(max_length=128, unique=True)
     status = models.CharField(max_length=16, choices=Status.choices)

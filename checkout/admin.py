@@ -1,40 +1,24 @@
 from django.contrib import admin
+
 from .models import (
-    Dev,
     Payment,
     SavedCard,
+    TransferLog,
     VirtualAccountSession,
     WebhookEvent,
-    TransferLog,
 )
-
-
-@admin.register(Dev)
-class DevAdmin(admin.ModelAdmin):
-    list_display = [
-        "account_name",
-        "account_number",
-        "bank_name",
-        "is_active",
-        "created_at",
-    ]
-    list_filter = ["is_active", "bank_name"]
-    search_fields = ["account_name", "account_number"]
-
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ["payment_ref", "dev", "amount", "status", "method", "created_at"]
+    list_display = ["payment_ref", "dev_id", "amount", "status", "method", "created_at"]
     list_filter = ["status", "method", "currency"]
     search_fields = ["payment_ref", "customer_email"]
-    raw_id_fields = ["dev"]
 
 
 @admin.register(SavedCard)
 class SavedCardAdmin(admin.ModelAdmin):
-    list_display = ["dev", "customer_email", "card_last4", "card_type", "created_at"]
+    list_display = ["dev_id", "customer_email", "card_last4", "card_type", "created_at"]
     search_fields = ["customer_email"]
-    raw_id_fields = ["dev"]
 
 
 @admin.register(VirtualAccountSession)
@@ -53,6 +37,6 @@ class WebhookEventAdmin(admin.ModelAdmin):
 
 @admin.register(TransferLog)
 class TransferLogAdmin(admin.ModelAdmin):
-    list_display = ["merchant_tx_ref", "dev", "amount", "status", "created_at"]
+    list_display = ["merchant_tx_ref", "amount", "status", "created_at"]
     list_filter = ["status"]
-    raw_id_fields = ["dev", "payment"]
+    raw_id_fields = ["payment"]

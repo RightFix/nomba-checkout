@@ -1,26 +1,5 @@
 from rest_framework import serializers
-from .models import Dev, Payment, SavedCard, VirtualAccountSession
-
-
-class DevLookupSerializer(serializers.Serializer):
-    """Used to look up an account name before registration."""
-    account_number = serializers.CharField(max_length=20)
-    bank_code      = serializers.CharField(max_length=16)
-
-
-class DevRegisterSerializer(serializers.Serializer):
-    """Used to create a Dev profile after the dev confirms their account name."""
-    account_number = serializers.CharField(max_length=20)
-    account_name   = serializers.CharField(max_length=255)
-    bank_code      = serializers.CharField(max_length=16)
-    bank_name      = serializers.CharField(max_length=128)
-
-
-class DevSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Dev
-        fields = ["id", "account_number", "account_name", "bank_name", "created_at"]
-
+from .models import Payment, SavedCard, VirtualAccountSession
 
 class InitiatePaymentSerializer(serializers.Serializer):
     dev_id         = serializers.UUIDField()

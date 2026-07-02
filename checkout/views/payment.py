@@ -7,8 +7,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from checkout.models import Dev, Payment, SavedCard
-from checkout.permissions import IsPluginRequest
+from checkout.models import Payment, SavedCard
 from checkout.serializers import (
     InitiatePaymentSerializer,
     PaymentStatusSerializer,
@@ -26,7 +25,7 @@ class InitiatePaymentView(APIView):
     customer, the dev, and the amount together. Returns the payment_ref
     that every subsequent card/transfer call needs.
     """
-    permission_classes = [IsPluginRequest]
+    # permission_classes = [IsPluginRequest]
 
     def post(self, request: Request) -> Response:
         ser = InitiatePaymentSerializer(data=request.data)
@@ -35,18 +34,9 @@ class InitiatePaymentView(APIView):
 
         data = ser.validated_data
 
-        try:
-            dev = Dev.objects.get(id=data["dev_id"], is_active=True)
-        except Dev.DoesNotExist:
-            return Response(
-                {"error": f"Dev '{data['dev_id']}' not found or inactive."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
         payment, created = Payment.objects.get_or_create(
-            payment_ref=data["payment_ref"],
             defaults={
-                "dev":            dev,
+                "dev":            data["dev_id"],
                 "amount":         data["amount"],
                 "currency":       data["currency"],
                 "customer_email": data["customer_email"],
@@ -55,13 +45,6 @@ class InitiatePaymentView(APIView):
                 "status":         Payment.Status.PENDING,
             },
         )
-
-        # If this payment_ref already exists for a different dev, reject.
-        if not created and payment.dev_id != dev.id:
-            return Response(
-                {"error": "payment_ref already used with a different dev."},
-                status=status.HTTP_409_CONFLICT,
-            )
 
         return Response(
             PaymentStatusSerializer(payment).data,
@@ -75,11 +58,10 @@ class PaymentStatusView(APIView):
     Poll payment status. The Bubble plugin calls this after card/transfer
     to show the customer success or failure.
     """
-    permission_classes = [IsPluginRequest]
 
     def get(self, request: Request, payment_ref: str) -> Response:
         try:
-            payment = Payment.objects.select_related("dev").get(
+            payment = Payment.objects.get(
                 payment_ref=payment_ref
             )
         except Payment.DoesNotExist:
@@ -97,7 +79,6 @@ class SavedCardsView(APIView):
     Returns any tokenised card for this customer + dev combination.
     Called at checkout open to show "use saved card?" prompt.
     """
-    permission_classes = [IsPluginRequest]
 
     def get(self, request: Request) -> Response:
         dev_id         = request.query_params.get("dev_id")

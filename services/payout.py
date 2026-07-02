@@ -71,7 +71,7 @@ def payout_to_dev(payment: Payment) -> TransferLog:
     so the webhook handler can still return 200 to Nomba (preventing
     Nomba from retrying a webhook that we already deduplicated).
     """
-    dev = payment.dev
+    dev = payment.dev_id
     merchant_tx_ref = f"payout-{payment.payment_ref}"
 
     # Guard: never double-pay. If a TransferLog already exists for this
@@ -92,11 +92,9 @@ def payout_to_dev(payment: Payment) -> TransferLog:
     transfer_status = TransferLog.Status.FAILED
 
     try:
-        result = nomba.transfers.perform_bank_account_transfer_from_the_parent_account(
+        result = nomba.transfers.perform_wallet_transfer_from_the_parent_account(
             amount=str(payment.amount),
-            account_number=dev.account_number,
-            account_name=dev.account_name,
-            bank_code=dev.bank_code,
+            receiver_account_id=dev, 
             merchant_tx_ref=merchant_tx_ref,
             sender_name="Nomba Checkout Platform",
             narration=f"Payout for {payment.payment_ref}",
@@ -106,7 +104,7 @@ def payout_to_dev(payment: Payment) -> TransferLog:
         log.info(
             "Payout succeeded: payment=%s dev=%s amount=%s ref=%s",
             payment.payment_ref,
-            dev.id,
+            dev,
             payment.amount,
             merchant_tx_ref,
         )
@@ -117,7 +115,7 @@ def payout_to_dev(payment: Payment) -> TransferLog:
         log.error(
             "Payout FAILED: payment=%s dev=%s error=%s",
             payment.payment_ref,
-            dev.id,
+            dev,
             exc,
         )
 

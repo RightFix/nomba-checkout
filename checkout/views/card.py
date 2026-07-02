@@ -11,7 +11,6 @@ from nomba import NombaAPIError
 from nomba.flows import CardPaymentFlow
 
 from checkout.models import Payment, SavedCard, TransferLog
-from checkout.permissions import IsPluginRequest
 from checkout.serializers import (
     SubmitCardSerializer,
     SubmitOTPSerializer,
@@ -36,8 +35,6 @@ class CardSubmitView(APIView):
     Submit encrypted card details. Returns requires_otp / requires_3ds flags.
     If payment completes immediately (responseCode 00), triggers payout to dev.
     """
-
-    permission_classes = [IsPluginRequest]
 
     def post(self, request: Request) -> Response:
         ser = SubmitCardSerializer(data=request.data)
@@ -106,7 +103,6 @@ class CardSubmitView(APIView):
 class CardOTPView(APIView):
     """POST /api/card/otp/"""
 
-    permission_classes = [IsPluginRequest]
 
     def post(self, request: Request) -> Response:
         ser = SubmitOTPSerializer(data=request.data)
@@ -116,7 +112,7 @@ class CardOTPView(APIView):
         data = ser.validated_data
 
         try:
-            payment = Payment.objects.select_related("dev").get(
+            payment = Payment.objects.get(
                 payment_ref=data["payment_ref"]
             )
         except Payment.DoesNotExist:
@@ -155,8 +151,6 @@ class CardOTPView(APIView):
 class CardOTPResendView(APIView):
     """POST /api/card/otp/resend/"""
 
-    permission_classes = [IsPluginRequest]
-
     def post(self, request: Request) -> Response:
         payment_ref = request.data.get("payment_ref")
         if not payment_ref:
@@ -183,7 +177,6 @@ class TokenizedCardPayView(APIView):
     re-enter card details. Customer still sees a confirmation before charge.
     """
 
-    permission_classes = [IsPluginRequest]
 
     def post(self, request: Request) -> Response:
         ser = TokenizedCardPaySerializer(data=request.data)
